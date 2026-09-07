@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS ecommerceCustomer;
+DROP TABLE IF EXISTS customers;
 
 CREATE TABLE customers (
     customer_id VARCHAR(20) PRIMARY KEY,
@@ -56,7 +56,7 @@ CREATE TABLE customers (
     clv_category VARCHAR(50)
 );
 BULK INSERT customers
-FROM 'C:\Users\shann\Downloads\archive (2)\E-commerce_Customer_Segmentation_2026.csv'
+FROM 'C:\Users\shann\Downloads\archive (2)\SQL Projects\E-commerce_Customer_Segmentation_2026.csv'
 WITH (
     FORMAT = 'CSV',
     FIRSTROW = 2,
@@ -64,5 +64,21 @@ WITH (
     ROWTERMINATOR = '0x0a',
     TABLOCK
 );
+
+SELECT 
+    customer_segment,
+    COUNT(*) AS total_customers,
+    SUM(CASE WHEN activity_status = 'Dormant' THEN 1 ELSE 0 END) AS churned_customers,
+    CAST(
+        100.0 * SUM(CASE WHEN activity_status = 'Dormant' THEN 1 ELSE 0 END) / COUNT(*)
+        AS DECIMAL(5,2) 
+    
+    ) AS churn_rate_percentage
+FROM 
+    customers
+GROUP BY 
+    customer_segment
+ORDER BY 
+    churn_rate_percentage DESC;
 
 SELECT * FROM customers;
